@@ -2,8 +2,8 @@
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-
+import { getAuth , onAuthStateChanged} from "firebase/auth";
+import { getFirestore, collection, doc, query, where, setDoc, getDocs, getDoc } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,7 +19,23 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
+const db = getFirestore(app);
 const auth = getAuth();
+
+ onAuthStateChanged (auth, (user) => {
+    if (user) {
+        (async () => {
+            const querySnapshot = await getDoc(doc(db, "todos", user.uid))
+        
+            if (querySnapshot.exists()) {
+                console.log(querySnapshot.data())
+            } else {
+                console.log("No such document")
+            }
+        })();
+    } else {
+        console.log("No such user")
+    }
+});
 
 export { auth };

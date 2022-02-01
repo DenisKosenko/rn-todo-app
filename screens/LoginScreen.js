@@ -16,7 +16,7 @@ const LoginScreen = () => {
         navigation.replace("Home")
       }
     })
-
+    
     return unsubscribe
   }, [])
 
