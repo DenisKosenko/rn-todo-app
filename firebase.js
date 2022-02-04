@@ -22,20 +22,22 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
 
- onAuthStateChanged (auth, (user) => {
+const userFirestore = onAuthStateChanged (auth, (user) => {
     if (user) {
         (async () => {
             const querySnapshot = await getDoc(doc(db, "todos", user.uid))
         
             if (querySnapshot.exists()) {
                 console.log(querySnapshot.data())
+                return querySnapshot.data()
             } else {
                 console.log("No such document")
             }
         })();
+
     } else {
         console.log("No such user")
     }
 });
 
-export { auth };
+export { auth, userFirestore };
