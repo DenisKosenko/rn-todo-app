@@ -1,16 +1,23 @@
-import { useNavigation } from '@react-navigation/core'
-import React, {useState, useEffect} from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { auth } from '../firebase'
-
+import React, {useEffect} from 'react'
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { makeSelectUserInfo } from '../selectors/user';
+import { useNavigation } from '@react-navigation/core'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { auth, InitializeFirestore, userSetDoc} from '../firebase'
+import { makeSelectUserInfo, makeSelectUserTodoList } from '../selectors/user';
 import { setUserInfo } from '../actions/user';
+import HomeItems from '../components/homeItems';
 
 let HomeScreen = (props) => {
+
+  const {dispatch, userTodoList, userInfo} = props
+
+  useEffect(()=>{
+    InitializeFirestore(dispatch)
+  },[])
+
   const navigation = useNavigation()
-  const [a, setA] = useState(null)
 
   const handleSignOut = () => {
     auth
@@ -23,14 +30,20 @@ let HomeScreen = (props) => {
 
   const onPressDedux = () => {
     console.log(props);
-    props.dispatch(setUserInfo('aaa'))
-    setA('aaa')
+    userSetDoc(
+      userTodoList
+    )
   }
 
-  console.log(props.userInfo);
+  console.log(userTodoList);
 
   return (
     <View style={styles.container}>
+      <HomeItems
+        dispatch={dispatch}
+        userTodoList={userTodoList}
+        userInfo={userInfo}
+      />
       <Text>Email: {auth.currentUser?.email}</Text>
       <TouchableOpacity
         onPress={onPressDedux}
@@ -50,14 +63,13 @@ let HomeScreen = (props) => {
 }
 
 const mapStateToProps = createStructuredSelector({
-  userInfo: makeSelectUserInfo()
+  userInfo: makeSelectUserInfo(),
+  userTodoList: makeSelectUserTodoList(),
 });
 
 HomeScreen = connect(
   mapStateToProps
 )(HomeScreen);
-
-export default HomeScreen
 
 const styles = StyleSheet.create({
   container: {
@@ -82,3 +94,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 })
+
+export default HomeScreen

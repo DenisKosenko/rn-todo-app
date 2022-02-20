@@ -3,7 +3,8 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { initializeApp } from "firebase/app";
 import { getAuth , onAuthStateChanged} from "firebase/auth";
-import { getFirestore, collection, doc, query, where, setDoc, getDocs, getDoc } from "firebase/firestore";
+import { getFirestore, collection, doc, query, where, setDoc, getDocs, updateDoc, getDoc } from "firebase/firestore";
+import { setUserInfo, setUserTodoList } from './actions/user';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,22 +23,32 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
 
-const userFirestore = onAuthStateChanged (auth, (user) => {
-    if (user) {
-        (async () => {
-            const querySnapshot = await getDoc(doc(db, "todos", user.uid))
-        
-            if (querySnapshot.exists()) {
-                console.log(querySnapshot.data())
-                return querySnapshot.data()
-            } else {
-                console.log("No such document")
-            }
-        })();
+let u
 
-    } else {
-        console.log("No such user")
-    }
-});
+const InitializeFirestore = (dispatch) => {
+    const userFirestore = onAuthStateChanged(auth, (user) => {
+        if (user) {
+            (async () => {
+                const querySnapshot = await getDoc(doc(db, "todos", user.uid))
+                u  = user.uid
+                dispatch(setUserInfo(user))
+            
+                if (querySnapshot.exists()){
+                    dispatch(setUserTodoList(querySnapshot.data()))
+                    console.log(querySnapshot.data())
+                    return querySnapshot.data()
+                } else {
+                    console.log("No such document")
+                }
+            })();
+        } else {
+            console.log("No such user")
+        }
+    });
+}
 
-export { auth, userFirestore };
+const userSetDoc = (data) => {
+    updateDoc(doc(db, "todos", u), data);
+}
+
+export { auth, InitializeFirestore, userSetDoc };

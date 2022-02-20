@@ -12,6 +12,18 @@ const makeSelectUserInfo = () => createSelector(
     },
 );
 
+const makeSelectUserTodoList = () => createSelector(
+    selectUser,
+    (userState) => {
+        if(userState) {
+            return userState.userTodoList;
+        }
+        return { userTodoList: [] }
+    },
+);
+
+
 export {
-    makeSelectUserInfo
+    makeSelectUserInfo,
+    makeSelectUserTodoList,
 };
